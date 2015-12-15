@@ -2,6 +2,36 @@
 
 ## Last changes
 
+## 2.0.1 (2015-12-09)
+
+  * **Bugfix:** Fixes a reporting issue related to the new repository structure.
+
+## 2.0.0 (2015-12-05)
+
+  * **BC break:** Uses PascalCase conventions instead of lowercase for all namespaces.
+
+## 1.3.0 (2015-12-05)
+
+  * **Add:** Creates a standalone version.
+  * **Add:** Reintroduces PHP 5.4 support.
+  * **BC break:** `use filter\Filter` must now be `use kahlan\filter\Filter` in `kahlan-config.php`.
+
+## 1.2.11 (2015-11-24)
+
+  * **Add:** Adds `given()` function to set lazy loadable variables.
+
+## 1.2.10 (2015-11-23)
+
+  * **Add:** Allows Kahlan's binary to deal with custom composer.json `"vendor-dir"` config.
+
+## 1.2.9 (2015-11-23)
+
+  * **Bugfix:** Makes sure Kahlan's global function can't be includes twice.
+
+## 1.2.8 (2015-11-22)
+
+  * **Bugfix:** Fixes a cwd issue when installed globally.
+
 ## 1.2.7 (2015-11-07)
 
   * **Add:** Adds a lcov compatible exporter.

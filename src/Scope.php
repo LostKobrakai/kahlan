@@ -1,20 +1,11 @@
 <?php
-namespace kahlan;
+namespace Kahlan;
 
 use Exception;
-use kahlan\analysis\Debugger;
+use Kahlan\Analysis\Debugger;
 
 class Scope
 {
-    /**
-     * Class dependencies.
-     *
-     * @var array
-     */
-    protected $_classes = [
-        'expectation' => 'kahlan\Expectation'
-    ];
-
     /**
      * Instances stack.
      *
@@ -23,26 +14,11 @@ class Scope
     protected static $_instances = [];
 
     /**
-     * A regexp pattern used to removes useless traces to focus on the one
-     * related to a spec file.
-     *
-     * @var string
-     */
-    protected $_backtraceFocus = null;
-
-    /**
-     * The scope backtrace.
-     *
-     * @var object
-     */
-    protected $_backtrace = null;
-
-    /**
      * List of reserved keywords which can't be used as scope variable.
      *
      * @var array
      */
-    protected static $_reserved = [
+    public static $blacklist = [
         '__construct' => true,
         '__call'      => true,
         '__get'       => true,
@@ -56,10 +32,11 @@ class Scope
         'describe'    => true,
         'dispatch'    => true,
         'emitReport'  => true,
+        'expect'      => true,
         'focus'       => true,
         'focused'     => true,
-        'expect'      => true,
         'failfast'    => true,
+        'given'       => true,
         'hash'        => true,
         'it'          => true,
         'logs'        => true,
@@ -84,6 +61,16 @@ class Scope
         'xdescribe'   => true,
         'xcontext'    => true,
         'xit'         => true
+    ];
+
+    /**
+     * Class dependencies.
+     *
+     * @var array
+     */
+    protected $_classes = [
+        'expectation' => 'Kahlan\Expectation',
+        'given'       => 'Kahlan\Given'
     ];
 
     /**
@@ -120,6 +107,13 @@ class Scope
      * @var array
      */
     protected $_data = [];
+
+    /**
+     * The lazy loaded scope's data.
+     *
+     * @var array
+     */
+    protected $_given = [];
 
     /**
      * The report result of executed spec.
@@ -189,6 +183,21 @@ class Scope
     protected $_timeout = 0;
 
     /**
+     * A regexp pattern used to removes useless traces to focus on the one
+     * related to a spec file.
+     *
+     * @var string
+     */
+    protected $_backtraceFocus = null;
+
+    /**
+     * The scope backtrace.
+     *
+     * @var object
+     */
+    protected $_backtrace = null;
+
+    /**
      * The Constructor.
      *
      * @param array $config The Suite config array. Options are:
@@ -228,10 +237,15 @@ class Scope
         if (array_key_exists($key, $this->_data)) {
             return $this->_data[$key];
         }
+        if (array_key_exists($key, $this->_given)) {
+            $scope = static::current();
+            $scope->{$key} = $this->_given[$key]($scope);
+            return $scope->__get($key);
+        }
         if ($this->_parent !== null) {
             return $this->_parent->__get($key);
         }
-        if (in_array($key, static::$_reserved)) {
+        if (in_array($key, static::$blacklist)) {
             if ($key == 'expect') {
                 throw new Exception("You can't use expect() inside of describe()");
             }
@@ -248,7 +262,7 @@ class Scope
      */
     public function __set($key, $value)
     {
-        if (isset(static::$_reserved[$key])) {
+        if (isset(static::$blacklist[$key])) {
             throw new Exception("Sorry `{$key}` is a reserved keyword, it can't be used as a scope variable.");
         }
         return $this->_data[$key] = $value;
@@ -271,6 +285,27 @@ class Scope
             return call_user_func_array($property, $params);
         }
         throw new Exception("Uncallable variable `{$name}`.");
+    }
+
+    /**
+     * Sets a lazy loaded data.
+     *
+     * @param  string  $name    The lazy loaded variable name.
+     * @param  Closure $closure The lazily executed closure.
+     * @return object
+     */
+    public function given($name, $closure)
+    {
+        if (isset(static::$blacklist[$name])) {
+            throw new Exception("Sorry `{$name}` is a reserved keyword, it can't be used as a scope variable.");
+        }
+        $class = $this->_classes['given'];
+        $given = new $class($closure);
+        if (array_key_exists($name, $this->_given)) {
+            $given->{$name} = $this->_given[$name](static::current());
+        }
+        $this->_given[$name] = $given;
+        return $this;
     }
 
     /**
@@ -355,14 +390,14 @@ class Scope
     {
         $data = compact('exception');
         switch(get_class($exception)) {
-            case 'kahlan\SkipException':
+            case 'Kahlan\SkipException':
                 if ($inEachHook) {
                     $this->report()->add('skip', $data);
                 } else {
                     $this->_skipChilds($exception);
                 }
             break;
-            case 'kahlan\IncompleteException':
+            case 'Kahlan\IncompleteException':
                 $this->report()->add('incomplete', $data);
             break;
             default:

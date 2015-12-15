@@ -295,7 +295,7 @@ it("expects $foo to receive message() but not followed by foo()", function() {
 To enable **Argument Matching** add the following `use` statement in the top of your tests:
 
 ```php
-use kahlan\Arg;
+use Kahlan\Arg;
 ```
 
 With the `Arg` class you can use any existing matchers to test arguments.
@@ -348,7 +348,7 @@ class ToBeZero
 Once created you only need to [register it](config-file.md) using the following syntax:
 
 ```php
-kahlan\Matcher::register('toBeZero', 'my\namespace\ToBeZero');
+Kahlan\Matcher::register('toBeZero', 'my\namespace\ToBeZero');
 ```
 
 **Note:** custom matcher should be reserved to frequently used matching. For other cases, just use the `toMatch` matcher using the matcher closure as parameter.
@@ -358,5 +358,5 @@ It's also possible to register a matcher to work only for a specific class name 
 Example:
 
 ```php
-kahlan\Matcher::register('toContain', 'my\namespace\ToContain', ' SplObjectStorage');
+Kahlan\Matcher::register('toContain', 'my\namespace\ToContain', ' SplObjectStorage');
 ```

@@ -2,12 +2,23 @@
 <?php
 $autoloader = null;
 
-if (file_exists($file = __DIR__ . '/../../../autoload.php')) {
-    $autoloader = include $file;
-    chdir(__DIR__ . '/../../../..');
-} elseif (file_exists($file = __DIR__ . '/../vendor/autoload.php')) {
-    $autoloader = include $file;
-    chdir(__DIR__ . '/..');
+if ($absolute = realpath(__DIR__ . '/../../../autoload.php')) {
+    $autoloader = include $absolute;
+} elseif ($absolute = realpath(__DIR__ . '/../vendor/autoload.php')) {
+    $autoloader = include $absolute;
+}
+
+$vendorDir = 'vendor';
+
+if ($composerPath = realpath(getcwd() . '/composer.json')) {
+    $composerJson = json_decode(file_get_contents($composerPath), true);
+    $vendorDir = isset($composerJson['vendor-dir']) ? $composerJson['vendor-dir'] : $vendorDir;
+}
+
+$relative = realpath(getcwd() . "/{$vendorDir}/autoload.php");
+
+if ($relative && $relative !== $absolute) {
+    $autoloader = include $relative;
 }
 
 if (!$autoloader) {
@@ -17,10 +28,10 @@ if (!$autoloader) {
     exit(1);
 }
 
-use box\Box;
-use kahlan\Suite;
-use kahlan\Matcher;
-use kahlan\cli\Kahlan;
+use Kahlan\Box\Box;
+use Kahlan\Suite;
+use Kahlan\Matcher;
+use Kahlan\Cli\Kahlan;
 
 $box = box('kahlan', new Box());
 

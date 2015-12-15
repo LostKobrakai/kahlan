@@ -29,7 +29,7 @@ However sometimes it's interesting to see in details all covered/uncovered lines
 Example:
 
 ```php
-./bin/kahlan --coverage="kahlan\reporter\coverage\driver\Xdebug::stop()"
+./bin/kahlan --coverage="Kahlan\Reporter\Coverage\Driver\Xdebug::stop()"
 ```
 
 ![warning](assets/warning.png) don't forget to correctly set the `--src` option if your source directory is not `src/`.
@@ -40,6 +40,15 @@ Will give you the detailed code coverage of the `Xdebug::stop()` method.
 
 **Note:**
 All available namespaces, classes or methods definitions can be extracted from a simple `--coverage=4` code coverage summary.
+
+**Note:**
+You can use PHPDBG code coverage capabilities to generate code coverage report through the following command line:
+
+```bash
+phpdbg -qrr ./bin/kahlan --coverage
+```
+
+Warning: while 80% faster than Xdebug it's currently not as accurate as Xdebug and more prone to Fatal Errors.
 
 **`--istanbul=<file>`**
 

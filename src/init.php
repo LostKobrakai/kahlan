@@ -1,13 +1,25 @@
 <?php
-use kahlan\Suite;
-use kahlan\Specification;
+use Kahlan\Suite;
+use Kahlan\Specification;
+use Kahlan\Box\BoxException;
 
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
 }
 error_reporting(E_ALL);
 
-if (!(getenv('KAHLAN_DISABLE_FUNCTIONS') || (defined('KAHLAN_DISABLE_FUNCTIONS') && KAHLAN_DISABLE_FUNCTIONS))) {
+$kahlanFuctions = true;
+
+if (getenv('KAHLAN_DISABLE_FUNCTIONS') || (defined('KAHLAN_DISABLE_FUNCTIONS') && KAHLAN_DISABLE_FUNCTIONS)) {
+    $kahlanFuctions = false;
+}
+
+if (defined('KAHLAN_FUNCTIONS_EXIST') && KAHLAN_FUNCTIONS_EXIST) {
+    $kahlanFuctions = false;
+}
+
+if ($kahlanFuctions) {
+    define('KAHLAN_FUNCTIONS_EXIST', true);
 
     function before($closure) {
         return Suite::current()->before($closure);
@@ -35,6 +47,10 @@ if (!(getenv('KAHLAN_DISABLE_FUNCTIONS') || (defined('KAHLAN_DISABLE_FUNCTIONS')
 
     function context($message, $closure, $timeout = null, $scope = 'normal') {
         return Suite::current()->context($message, $closure, $timeout, $scope);
+    }
+
+    function given($name, $value) {
+        return Suite::current()->given($name, $value);
     }
 
     function it($message, $closure, $timeout = null, $scope = 'normal') {
@@ -74,9 +90,43 @@ if (!(getenv('KAHLAN_DISABLE_FUNCTIONS') || (defined('KAHLAN_DISABLE_FUNCTIONS')
     /**
      * @param $actual
      *
-     * @return kahlan\Matcher
+     * @return Kahlan\Matcher
      */
     function expect($actual) {
         return Specification::current()->expect($actual);
     }
+}
+
+$boxFuctions = true;
+
+if (getenv('BOX_DISABLE_FUNCTIONS') || (defined('BOX_DISABLE_FUNCTIONS') && BOX_DISABLE_FUNCTIONS)) {
+    $boxFuctions = false;
+}
+
+if (defined('BOX_FUNCTIONS_EXIST') && BOX_FUNCTIONS_EXIST) {
+    $boxFuctions = false;
+}
+
+if ($boxFuctions) {
+    define('BOX_FUNCTIONS_EXIST', true);
+
+    function box($name, $box = null) {
+        static $boxes = [];
+        if ($name === false) {
+            $boxes = [];
+            return;
+        }
+        if ($box === false) {
+            unset($boxes[$name]);
+            return;
+        }
+        if ($box) {
+            return $boxes[$name] = $box;
+        }
+        if (isset($boxes[$name])) {
+            return $boxes[$name];
+        }
+        throw new BoxException("Unexisting box `'{$name}'`.");
+    }
+
 }

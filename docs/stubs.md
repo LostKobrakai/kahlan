@@ -8,7 +8,7 @@
 To enable **Method Stubbing** add the following `use` statement in the top of your specs:
 
 ```php
-use kahlan\plugin\Stub;
+use Kahlan\Plugin\Stub;
 ```
 
 ### <a name="method-stubbing"></a>Method Stubbing
@@ -187,9 +187,9 @@ An example using `'extends'`:
 ```php
 it("stubs an instance with a parent class", function() {
 
-    $stub = Stub::create(['extends' => 'kahlan\util\Text']);
+    $stub = Stub::create(['extends' => 'Kahlan\Util\Text']);
     expect(is_object($stub))->toBe(true);
-    expect(get_parent_class($stub))->toBe('kahlan\util\Text');
+    expect(get_parent_class($stub))->toBe('Kahlan\Util\Text');
 
 });
 ```
@@ -203,7 +203,7 @@ However, if you still want to include magic methods with the `'extends'` option,
 it("stubs an instance with a parent class and keeps magic methods", function() {
 
     $stub = Stub::create([
-        'extends'      => 'kahlan\util\Text',
+        'extends'      => 'Kahlan\Util\Text',
         'magicMethods' => true
     ]);
 

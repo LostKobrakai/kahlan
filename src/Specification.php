@@ -1,5 +1,5 @@
 <?php
-namespace kahlan;
+namespace Kahlan;
 
 use Closure;
 use Exception;
@@ -74,7 +74,7 @@ class Specification extends Scope
     /**
      * Processes a child specs.
      *
-     * @see kahlan\Suite::process()
+     * @see Kahlan\Suite::process()
      * @param object A child spec.
      */
     public function process()
@@ -91,10 +91,9 @@ class Specification extends Scope
                 $result = $this->run();
             } catch (Exception $exception) {
                 $this->_exception($exception);
-            } finally {
-                foreach ($this->logs() as $log) {
-                    $this->report()->add($log['type'], $log);
-                }
+            }
+            foreach ($this->logs() as $log) {
+                $this->report()->add($log['type'], $log);
             }
             $this->_specEnd();
         } catch (Exception $exception) {
@@ -157,12 +156,13 @@ class Specification extends Scope
                 }
                 $this->_passed = $this->_passed && $expectation->passed();
             }
-        } catch (Exception $e) {
-            $this->_passed = false;
-            throw $e;
-        } finally {
             array_pop(static::$_instances);
             $this->_locked = false;
+        } catch (Exception $e) {
+            $this->_passed = false;
+            array_pop(static::$_instances);
+            $this->_locked = false;
+            throw $e;
         }
 
         return $result;
